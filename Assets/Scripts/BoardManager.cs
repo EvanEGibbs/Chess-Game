@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class BoardManager : MonoBehaviour {
 
+	public static BoardManager Instance { set; get; }
+	private bool[,] allowedMoves { set; get; }
+
 	//array of positions on the board, stores a chessman
 	public Chessman[,] Chessmans { set; get; }
 	private Chessman selectedChessman;
@@ -26,6 +29,7 @@ public class BoardManager : MonoBehaviour {
 	public bool isWhiteTurn = true;
 
 	private void Start() {
+		Instance = this;
 		SpawnAllChessmans();
 	}
 
@@ -49,6 +53,7 @@ public class BoardManager : MonoBehaviour {
 			}
 			//if clicked somewhere off the board
 			else {
+				BoardHighlights.Instance.HideHighlights();
 				selectedChessman = null;
 			}
 		}
@@ -63,28 +68,46 @@ public class BoardManager : MonoBehaviour {
 		if (Chessmans[x,y].isWhite != isWhiteTurn) {
 			return;
 		}
+
+		allowedMoves = Chessmans[x, y].PossibleMove();
+		BoardHighlights.Instance.HighlightAllowedMoves(allowedMoves);
+
 		//select the clicked on chess piece
 		selectedChessman = Chessmans[x, y];
 	}
 
 	private void MoveChessman (int x, int y) {
 		//if the move is possible
-		if (selectedChessman.PossibleMove(x, y)) {
+		if (allowedMoves[x,y]) {
+			Chessman c = Chessmans[x, y];
+			if (c != null && c.isWhite != isWhiteTurn) {
+				//Capture a piece
+
+				//if it is the king, end the game
+				if (c.GetType() == typeof(King)) {
+					// End the Game
+					return;
+				}
+				activeChessman.Remove(c.gameObject);
+				Destroy(c.gameObject);
+			}
 			//remove selected chessman from the array
 			Chessmans[selectedChessman.CurrentX, selectedChessman.CurrentY] = null;
 			//move the piece
 			selectedChessman.transform.position = GetTileCenter(x, y);
+			//set the position variable within the chess piece class
+			selectedChessman.SetPosition(x, y);
 			//put the chessman back into the array in it's new position
 			Chessmans[x, y] = selectedChessman;
 
-			//TODO need to set position again within the piece
-			//Chessmans[x, y].SetPostion(x, y);
+			
 
 			//switch player turn
 			isWhiteTurn = !isWhiteTurn;
 		}
 
 		selectedChessman = null;
+		BoardHighlights.Instance.HideHighlights();
 	}
 	
 	private void UpdateSelection() {
@@ -159,7 +182,7 @@ public class BoardManager : MonoBehaviour {
 		//set chessmans array of the position of the new piece to the new piece
 		Chessmans[x, y] = go.GetComponent<Chessman>();
 		//store position information within the piece
-		Chessmans[x, y].SetPostion(x, y);
+		Chessmans[x, y].SetPosition(x, y);
 		//add to list of chessmen
 		activeChessman.Add(go);
 	}

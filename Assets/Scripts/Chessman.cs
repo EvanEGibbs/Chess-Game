@@ -8,12 +8,12 @@ public class Chessman : MonoBehaviour {
 	public int CurrentY { set; get; }
 	public bool isWhite;
 
-	public void SetPostion (int x, int y) {
+	public void SetPosition (int x, int y) {
 		CurrentX = x;
 		CurrentY = y;
 	}
 
-	public virtual bool PossibleMove (int x, int y) {
-		return true;
+	public virtual bool[,] PossibleMove () {
+		return new bool [8,8];
 	}
 }
