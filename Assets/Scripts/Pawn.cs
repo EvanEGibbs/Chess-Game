@@ -44,7 +44,7 @@ public class Pawn : Chessman {
 			if (CurrentY == 1) {
 				c = BoardManager.Instance.Chessmans[CurrentX, CurrentY + 1];
 				c2 = BoardManager.Instance.Chessmans[CurrentX, CurrentY + 2];
-				if (c == null && c == null) {
+				if (c == null && c2 == null) {
 					r[CurrentX, CurrentY + 2] = true;
 				}
 			}
@@ -82,7 +82,7 @@ public class Pawn : Chessman {
 			if (CurrentY == 6) {
 				c = BoardManager.Instance.Chessmans[CurrentX, CurrentY - 1];
 				c2 = BoardManager.Instance.Chessmans[CurrentX, CurrentY - 2];
-				if (c == null && c == null) {
+				if (c == null && c2 == null) {
 					r[CurrentX, CurrentY - 2] = true;
 				}
 			}

@@ -69,6 +69,7 @@ public class BoardManager : MonoBehaviour {
 
 	private void SelectChessman(int x, int y) {
 		//if there is no chessman on the space clicked
+		Debug.Log(Chessmans[x, y]);
 		if (Chessmans[x, y] == null) {
 			return;
 		}
@@ -80,6 +81,8 @@ public class BoardManager : MonoBehaviour {
 		bool hasAtLeastOneMove = false;
 
 		allowedMoves = Chessmans[x, y].PossibleMove();
+
+		checkIllegalMoves(x, y);
 
 		for(int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
@@ -301,5 +304,84 @@ public class BoardManager : MonoBehaviour {
 		isWhiteTurn = true;
 		BoardHighlights.Instance.HideHighlights();
 		SpawnAllChessmans();
+	}
+
+	private void checkIllegalMoves(int x, int y) {
+		//create a temp variable for selected chessman
+		Chessman tempSelectedChessman = Chessmans[x, y];
+		//temporarily remove selected piece from chessmans
+		Chessmans[x, y] = null;
+		//white king's position
+		King whiteKing = GameObject.FindGameObjectWithTag("WhiteKing").GetComponent<King>();
+		King blackKing = GameObject.FindGameObjectWithTag("BlackKing").GetComponent<King>();
+		int whiteKingX = whiteKing.CurrentX;
+		int whiteKingY = whiteKing.CurrentY;
+		int blackKingX = blackKing.CurrentX;
+		int blackKingY = blackKing.CurrentY;
+
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (allowedMoves[i, j]) {
+
+					//reset x and y of king in case piece is not king (see next comment)
+					whiteKingX = whiteKing.CurrentX;
+					whiteKingY = whiteKing.CurrentY;
+					blackKingX = blackKing.CurrentX;
+					blackKingY = blackKing.CurrentY;
+					//if the piece is a king, reset their x and y to the square they are moving to
+					if (tempSelectedChessman.GetType() == typeof(King)) {
+						if (isWhiteTurn) {
+							whiteKingX = i;
+							whiteKingY = j;
+						}
+						else {
+							blackKingX = i;
+							blackKingY = j;
+						}
+					}
+
+						//Debug.Log("allowed move at: " + i + ", " + j);
+
+						Chessman originalStateChessman = Chessmans[i, j];
+					Chessmans[i, j] = tempSelectedChessman;
+
+					//if where the piece is going to move has an enemy piece, temporarily remove that piece for the check
+
+					foreach(GameObject c in activeChessman) {
+						Chessman ch = c.GetComponent<Chessman>();
+						//if the piece is not about to be taken
+						if (ch.CurrentX == i && ch.CurrentY == j) {
+							//the piece has been taken, so don't check if it can eat the king
+						}
+						else {
+							//white turn
+							if (isWhiteTurn) {
+								if (!ch.isWhite) {
+									bool[,] enemyPossibleMoves = ch.PossibleMove();
+									if (enemyPossibleMoves[whiteKingX, whiteKingY]) {
+										allowedMoves[i, j] = false;
+									}
+								}
+							}
+							//black turn
+							else {
+								if (ch.isWhite) {
+									bool[,] enemyPossibleMoves = ch.PossibleMove();
+									if (enemyPossibleMoves[blackKingX, blackKingY]) {
+										allowedMoves[i, j] = false;
+									}
+								}
+							}
+						}
+					}
+
+					Chessmans[i, j] = originalStateChessman;
+
+				}
+			}
+		}
+
+		//return removed chessman to it's rightful spot
+		Chessmans[x, y] = tempSelectedChessman;
 	}
 }
