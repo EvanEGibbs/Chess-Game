@@ -26,6 +26,11 @@ public class BoardManager : MonoBehaviour {
 	//orientation for the pieces
 	private Quaternion orientation = Quaternion.Euler(0,180, 0);
 
+	private Material previousMat;
+	public Material selectedMat;
+
+	public int[] EnPassantMove { set; get; } 
+
 	public bool isWhiteTurn = true;
 
 	private void Start() {
@@ -41,7 +46,7 @@ public class BoardManager : MonoBehaviour {
 		if (Input.GetMouseButtonDown(0)) {
 			if (selectionX >= 0 && selectionY >= 0) {
 				//if no piece selected
-				if(selectedChessman == null) {
+				if (selectedChessman == null) {
 					//select the chessman clicked on
 					SelectChessman(selectionX, selectionY);
 				}
@@ -54,7 +59,10 @@ public class BoardManager : MonoBehaviour {
 			//if clicked somewhere off the board
 			else {
 				BoardHighlights.Instance.HideHighlights();
-				selectedChessman = null;
+				if (selectedChessman != null) { 
+					selectedChessman.GetComponent<MeshRenderer>().material = previousMat;
+					selectedChessman = null;
+				}
 			}
 		}
 	}
@@ -88,6 +96,9 @@ public class BoardManager : MonoBehaviour {
 
 		//select the clicked on chess piece
 		selectedChessman = Chessmans[x, y];
+		previousMat = selectedChessman.GetComponent<MeshRenderer>().material;
+		selectedMat.mainTexture = previousMat.mainTexture;
+		selectedChessman.GetComponent<MeshRenderer>().material = selectedMat;
 	}
 
 	private void MoveChessman (int x, int y) {
@@ -105,6 +116,43 @@ public class BoardManager : MonoBehaviour {
 				activeChessman.Remove(c.gameObject);
 				Destroy(c.gameObject);
 			}
+
+			if (x == EnPassantMove[0] && y == EnPassantMove[1]) {
+				if (isWhiteTurn) {
+					c = Chessmans[x, y - 1];
+				}
+				else {
+					c = Chessmans[x, y + 1];
+				}
+				activeChessman.Remove(c.gameObject);
+				Destroy(c.gameObject);
+			}
+
+			EnPassantMove[0] = -1;
+			EnPassantMove[1] = -1;
+			if (selectedChessman.GetType() == typeof(Pawn)) {
+
+				if( y == 7) {
+					activeChessman.Remove(selectedChessman.gameObject);
+					Destroy(selectedChessman.gameObject);
+					SpawnChessman(1, x, y);
+					selectedChessman = Chessmans[x, y];
+				} else if (y == 0) {
+					activeChessman.Remove(selectedChessman.gameObject);
+					Destroy(selectedChessman.gameObject);
+					SpawnChessman(7, x, y);
+					selectedChessman = Chessmans[x, y];
+				}
+
+				if (selectedChessman.CurrentY == 1 && y == 3) {
+					EnPassantMove[0] = x;
+					EnPassantMove[1] = y-1;
+				} else if (selectedChessman.CurrentY == 6 && y == 4) {
+					EnPassantMove[0] = x;
+					EnPassantMove[1] = y+1;
+				} 
+			}
+
 			//remove selected chessman from the array
 			Chessmans[selectedChessman.CurrentX, selectedChessman.CurrentY] = null;
 			//move the piece
@@ -120,6 +168,7 @@ public class BoardManager : MonoBehaviour {
 			isWhiteTurn = !isWhiteTurn;
 		}
 
+		selectedChessman.GetComponent<MeshRenderer>().material = previousMat;
 		selectedChessman = null;
 		BoardHighlights.Instance.HideHighlights();
 	}
@@ -145,6 +194,7 @@ public class BoardManager : MonoBehaviour {
 		activeChessman = new List<GameObject>();
 		//the array of the board has it's size defined (takes in type Chessman)
 		Chessmans = new Chessman[8, 8];
+		EnPassantMove = new int[2] { -1, -1 };
 
 		//Spawn chessman, first input is piece type, second is x position, third is z position)
 
