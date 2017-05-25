@@ -69,7 +69,6 @@ public class BoardManager : MonoBehaviour {
 
 	private void SelectChessman(int x, int y) {
 		//if there is no chessman on the space clicked
-		Debug.Log(Chessmans[x, y]);
 		if (Chessmans[x, y] == null) {
 			return;
 		}
@@ -134,19 +133,21 @@ public class BoardManager : MonoBehaviour {
 			EnPassantMove[0] = -1;
 			EnPassantMove[1] = -1;
 			if (selectedChessman.GetType() == typeof(Pawn)) {
-
+				//promotion
 				if( y == 7) {
 					activeChessman.Remove(selectedChessman.gameObject);
 					Destroy(selectedChessman.gameObject);
+					//replace with queen
 					SpawnChessman(1, x, y);
 					selectedChessman = Chessmans[x, y];
 				} else if (y == 0) {
 					activeChessman.Remove(selectedChessman.gameObject);
 					Destroy(selectedChessman.gameObject);
+					//replace with queen
 					SpawnChessman(7, x, y);
 					selectedChessman = Chessmans[x, y];
 				}
-
+				//check for en passant
 				if (selectedChessman.CurrentY == 1 && y == 3) {
 					EnPassantMove[0] = x;
 					EnPassantMove[1] = y-1;
@@ -165,10 +166,22 @@ public class BoardManager : MonoBehaviour {
 			//put the chessman back into the array in it's new position
 			Chessmans[x, y] = selectedChessman;
 
-			
-
 			//switch player turn
 			isWhiteTurn = !isWhiteTurn;
+
+			if (!CheckCanMove()) {
+				if (IsStalemate()) {
+					Debug.Log("Stalemate!");
+				}
+				else {
+					if (isWhiteTurn) {
+						Debug.Log("Black team wins!");
+					}
+					else {
+						Debug.Log("White team wins!");
+					}
+				}
+			}
 		}
 
 		selectedChessman.GetComponent<MeshRenderer>().material = previousMat;
@@ -383,5 +396,73 @@ public class BoardManager : MonoBehaviour {
 
 		//return removed chessman to it's rightful spot
 		Chessmans[x, y] = tempSelectedChessman;
+	}
+
+	private bool CheckCanMove() {
+		bool canMove = false;
+
+		foreach(GameObject go in activeChessman) {
+			Chessman chessmanPiece = go.GetComponent<Chessman>();
+			if (isWhiteTurn && chessmanPiece.isWhite) {
+				allowedMoves = chessmanPiece.PossibleMove();
+				checkIllegalMoves(chessmanPiece.CurrentX, chessmanPiece.CurrentY);
+				for (int i = 0; i < 8; i++) {
+					for (int j = 0; j < 8; j++) {
+						if (allowedMoves[i,j]) {
+							canMove = true;
+						}
+					}
+				}
+			} else if (!isWhiteTurn && !chessmanPiece.isWhite) {
+				allowedMoves = chessmanPiece.PossibleMove();
+				checkIllegalMoves(chessmanPiece.CurrentX, chessmanPiece.CurrentY);
+				for (int i = 0; i < 8; i++) {
+					for (int j = 0; j < 8; j++) {
+						if (allowedMoves[i, j]) {
+							canMove = true;
+						}
+					}
+				}
+			}
+		}
+
+		return canMove;
+	}
+
+	private bool IsStalemate() {
+		bool isStalemate = true;
+
+		if (isWhiteTurn) {
+			King whiteKing = GameObject.FindGameObjectWithTag("WhiteKing").GetComponent<King>();
+			int whiteKingX = whiteKing.CurrentX;
+			int whiteKingY = whiteKing.CurrentY;
+			foreach (GameObject go in activeChessman) {
+				Chessman chessPiece = go.GetComponent<Chessman>();
+				if (!chessPiece.isWhite) {
+					allowedMoves = chessPiece.PossibleMove();
+					checkIllegalMoves(chessPiece.CurrentX, chessPiece.CurrentY);
+					if (allowedMoves[whiteKingX, whiteKingY]) {
+						isStalemate = false;
+					}
+				}
+			}
+		}
+		else {
+			King blackKing = GameObject.FindGameObjectWithTag("BlackKing").GetComponent<King>();
+			int blackKingX = blackKing.CurrentX;
+			int blackKingY = blackKing.CurrentY;
+			foreach (GameObject go in activeChessman) {
+				Chessman chessPiece = go.GetComponent<Chessman>();
+				if (chessPiece.isWhite) {
+					allowedMoves = chessPiece.PossibleMove();
+					checkIllegalMoves(chessPiece.CurrentX, chessPiece.CurrentY);
+					if (allowedMoves[blackKingX, blackKingY]) {
+						isStalemate = false;
+					}
+				}
+			}
+		}
+
+		return isStalemate;
 	}
 }
