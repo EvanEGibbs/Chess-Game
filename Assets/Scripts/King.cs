@@ -59,6 +59,64 @@ public class King : Chessman {
 			}
 		}
 
+		//castling right
+		if (!HasMoved) {
+			//check all three spaces aren't threatened
+			if(!BoardManager.Instance.ThreatenedSpace(CurrentX, CurrentY) && !BoardManager.Instance.ThreatenedSpace(CurrentX +1, CurrentY) && !BoardManager.Instance.ThreatenedSpace(CurrentX +2, CurrentY)) {
+				//check that two spaces to the right are empty
+				if (BoardManager.Instance.Chessmans[CurrentX + 1, CurrentY] == null && BoardManager.Instance.Chessmans[CurrentX + 2, CurrentY] == null) {
+					//white
+					if (BoardManager.Instance.isWhiteTurn) {
+						//if the rook hasn't moved
+						if (BoardManager.Instance.Chessmans[7, 0] != null) {
+							Chessman possibleRook = BoardManager.Instance.Chessmans[7, 0].GetComponent<Chessman>();
+							if (possibleRook.GetType() == typeof(Rook) && possibleRook.HasMoved == false) {
+								r[CurrentX + 2, CurrentY] = true;
+							}
+						}
+					}
+					//black
+					else {
+						if (BoardManager.Instance.Chessmans[7, 7] != null) {
+							Chessman possibleRook = BoardManager.Instance.Chessmans[7, 7].GetComponent<Chessman>();
+							if (possibleRook.GetType() == typeof(Rook) && possibleRook.HasMoved == false) {
+								r[CurrentX + 2, CurrentY] = true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		//castling left
+		if (!HasMoved) {
+			//check all three spaces aren't threatened
+			if (!BoardManager.Instance.ThreatenedSpace(CurrentX, CurrentY) && !BoardManager.Instance.ThreatenedSpace(CurrentX - 1, CurrentY) && !BoardManager.Instance.ThreatenedSpace(CurrentX - 2, CurrentY)) {
+				//check that two spaces to the right are empty
+				if (BoardManager.Instance.Chessmans[CurrentX - 1, CurrentY] == null && BoardManager.Instance.Chessmans[CurrentX - 2, CurrentY] == null) {
+					//white
+					if (BoardManager.Instance.isWhiteTurn) {
+						//if the rook hasn't moved
+						if (BoardManager.Instance.Chessmans[0, 0] != null) {
+							Chessman possibleRook = BoardManager.Instance.Chessmans[0, 0].GetComponent<Chessman>();
+							if (possibleRook.GetType() == typeof(Rook) && possibleRook.HasMoved == false) {
+								r[CurrentX - 2, CurrentY] = true;
+							}
+						}
+					}
+					//black
+					else {
+						if (BoardManager.Instance.Chessmans[0, 7] != null) {
+							Chessman possibleRook = BoardManager.Instance.Chessmans[0, 7].GetComponent<Chessman>();
+							if (possibleRook.GetType() == typeof(Rook) && possibleRook.HasMoved == false) {
+								r[CurrentX - 2, CurrentY] = true;
+							}
+						}
+					}
+				}
+			}
+		}
+
 		return r;
 	}
 }

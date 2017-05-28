@@ -6,6 +6,7 @@ public class Chessman : MonoBehaviour {
 
 	public int CurrentX { set; get; }
 	public int CurrentY { set; get; }
+	public bool HasMoved { set; get; }
 	public bool isWhite;
 
 	public void SetPosition (int x, int y) {

@@ -157,10 +157,35 @@ public class BoardManager : MonoBehaviour {
 				} 
 			}
 
+			//check for castling
+			if (selectedChessman.GetType() == typeof(King)) {
+				//castling right
+				if (selectedChessman.CurrentX == 4 && x == 6) {
+					//remove the rook (look after check for castling section for comments on moving a piece
+					Chessman rook = Chessmans[7, y];
+					Chessmans[7, y] = null;
+					rook.transform.position = GetTileCenter(5, y);
+					rook.HasMoved = true;
+					rook.SetPosition(5, y);
+					Chessmans[5, y] = rook;
+				}
+				//castling left
+				if (selectedChessman.CurrentX == 4 && x == 2) {
+					//remove the rook (look after check for castling section for comments on moving a piece
+					Chessman rook = Chessmans[0, y];
+					Chessmans[0, y] = null;
+					rook.transform.position = GetTileCenter(3, y);
+					rook.HasMoved = true;
+					rook.SetPosition(3, y);
+					Chessmans[3, y] = rook;
+				}
+			}
+
 			//remove selected chessman from the array
 			Chessmans[selectedChessman.CurrentX, selectedChessman.CurrentY] = null;
 			//move the piece
 			selectedChessman.transform.position = GetTileCenter(x, y);
+			selectedChessman.HasMoved = true;
 			//set the position variable within the chess piece class
 			selectedChessman.SetPosition(x, y);
 			//put the chessman back into the array in it's new position
@@ -464,5 +489,24 @@ public class BoardManager : MonoBehaviour {
 		}
 
 		return isStalemate;
+	}
+
+	public bool ThreatenedSpace(int x, int y) {
+
+	bool threatened = false;
+	bool[,] possibleMovesList = new bool[8,8];
+
+		foreach (GameObject chessman in activeChessman) {
+			Chessman ch = chessman.GetComponent<Chessman>();
+			if (ch.GetType() != typeof(King)) {
+				if (ch.isWhite != isWhiteTurn) {
+					possibleMovesList = ch.PossibleMove();
+					if (possibleMovesList[x, y]) {
+						threatened = true;
+					}
+				}
+			}
+		}
+		return threatened;
 	}
 }
