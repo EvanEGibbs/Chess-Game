@@ -52,38 +52,40 @@ public class Pawn : Chessman {
 		//black team move
 		else {
 			//diagonal left
-			if (e[0] == CurrentX - 1 && e[1] == CurrentY - 1) {
-				r[CurrentX - 1, CurrentY - 1] = true;
-			}
-			if (CurrentX != 0 && CurrentY != 0) {
-				c = BoardManager.Instance.Chessmans[CurrentX - 1, CurrentY - 1];
-				if (c != null && c.isWhite) {
+			if (CurrentY > 0) {
+				if (e[0] == CurrentX - 1 && e[1] == CurrentY - 1) {
 					r[CurrentX - 1, CurrentY - 1] = true;
 				}
-			}
-			//diagonal right
-			if (e[0] == CurrentX + 1 && e[1] == CurrentY - 1) {
-				r[CurrentX + 1, CurrentY - 1] = true;
-			}
-			if (CurrentX != 7 && CurrentY != 0) {
-				c = BoardManager.Instance.Chessmans[CurrentX + 1, CurrentY - 1];
-				if (c != null && c.isWhite) {
+				if (CurrentX != 0 && CurrentY != 0) {
+					c = BoardManager.Instance.Chessmans[CurrentX - 1, CurrentY - 1];
+					if (c != null && c.isWhite) {
+						r[CurrentX - 1, CurrentY - 1] = true;
+					}
+				}
+				//diagonal right
+				if (e[0] == CurrentX + 1 && e[1] == CurrentY - 1) {
 					r[CurrentX + 1, CurrentY - 1] = true;
 				}
-			}
-			//middle
-			if (CurrentY != 0) {
-				c = BoardManager.Instance.Chessmans[CurrentX, CurrentY - 1];
-				if (c == null) {
-					r[CurrentX, CurrentY - 1] = true;
+				if (CurrentX != 7 && CurrentY != 0) {
+					c = BoardManager.Instance.Chessmans[CurrentX + 1, CurrentY - 1];
+					if (c != null && c.isWhite) {
+						r[CurrentX + 1, CurrentY - 1] = true;
+					}
 				}
-			}
-			//middle on first move
-			if (CurrentY == 6) {
-				c = BoardManager.Instance.Chessmans[CurrentX, CurrentY - 1];
-				c2 = BoardManager.Instance.Chessmans[CurrentX, CurrentY - 2];
-				if (c == null && c2 == null) {
-					r[CurrentX, CurrentY - 2] = true;
+				//middle
+				if (CurrentY != 0) {
+					c = BoardManager.Instance.Chessmans[CurrentX, CurrentY - 1];
+					if (c == null) {
+						r[CurrentX, CurrentY - 1] = true;
+					}
+				}
+				//middle on first move
+				if (CurrentY == 6) {
+					c = BoardManager.Instance.Chessmans[CurrentX, CurrentY - 1];
+					c2 = BoardManager.Instance.Chessmans[CurrentX, CurrentY - 2];
+					if (c == null && c2 == null) {
+						r[CurrentX, CurrentY - 2] = true;
+					}
 				}
 			}
 		}

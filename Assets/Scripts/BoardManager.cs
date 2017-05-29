@@ -7,9 +7,14 @@ public class BoardManager : MonoBehaviour {
 	public static BoardManager Instance { set; get; }
 	private bool[,] allowedMoves { set; get; }
 
+	public GameObject whitePromotion;
+	public GameObject blackPromotion;
+	private GameObject chessPlane;
+
 	//array of positions on the board, stores a chessman
 	public Chessman[,] Chessmans { set; get; }
 	private Chessman selectedChessman;
+	private Chessman promotionPiece;
 
 	public List<GameObject> chessmanPrefabs;
 
@@ -35,6 +40,9 @@ public class BoardManager : MonoBehaviour {
 
 	private void Start() {
 		Instance = this;
+		whitePromotion.SetActive(false);
+		blackPromotion.SetActive(false);
+		chessPlane = transform.FindChild("ChessPlane").gameObject;
 		SpawnAllChessmans();
 	}
 
@@ -134,18 +142,16 @@ public class BoardManager : MonoBehaviour {
 			EnPassantMove[1] = -1;
 			if (selectedChessman.GetType() == typeof(Pawn)) {
 				//promotion
+				//white
 				if( y == 7) {
-					activeChessman.Remove(selectedChessman.gameObject);
-					Destroy(selectedChessman.gameObject);
-					//replace with queen
-					SpawnChessman(1, x, y);
-					selectedChessman = Chessmans[x, y];
+					promotionPiece = selectedChessman;
+					whitePromotion.SetActive(true);
+					chessPlane.SetActive(false);
+				//black
 				} else if (y == 0) {
-					activeChessman.Remove(selectedChessman.gameObject);
-					Destroy(selectedChessman.gameObject);
-					//replace with queen
-					SpawnChessman(7, x, y);
-					selectedChessman = Chessmans[x, y];
+					promotionPiece = selectedChessman;
+					blackPromotion.SetActive(true);
+					chessPlane.SetActive(false);
 				}
 				//check for en passant
 				if (selectedChessman.CurrentY == 1 && y == 3) {
@@ -508,5 +514,48 @@ public class BoardManager : MonoBehaviour {
 			}
 		}
 		return threatened;
+	}
+
+	public void Promote(string pieceType) {
+		int x = promotionPiece.CurrentX;
+		int y = promotionPiece.CurrentY;
+		activeChessman.Remove(promotionPiece.gameObject);
+		Destroy(promotionPiece.gameObject);
+		//replace with new piece
+		//white
+		if (promotionPiece.isWhite) {
+			if (pieceType == "Queen") {
+				SpawnChessman(1, x, y);
+			}
+			else if (pieceType == "Rook") {
+				SpawnChessman(2, x, y);
+			}
+			else if (pieceType == "Bishop") {
+				SpawnChessman(3, x, y);
+			}
+			else if (pieceType == "Knight") {
+				SpawnChessman(4, x, y);
+			}
+		}
+		//black
+		else {
+			if (pieceType == "Queen") {
+				SpawnChessman(7, x, y);
+			}
+			else if (pieceType == "Rook") {
+				SpawnChessman(8, x, y);
+			}
+			else if (pieceType == "Bishop") {
+				SpawnChessman(9, x, y);
+			}
+			else if (pieceType == "Knight") {
+				SpawnChessman(10, x, y);
+			}
+		}
+		
+		//selectedChessman = Chessmans[x, y];
+		chessPlane.SetActive(true);
+		whitePromotion.SetActive(false);
+		blackPromotion.SetActive(false);
 	}
 }
