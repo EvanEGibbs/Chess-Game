@@ -118,11 +118,11 @@ public class BoardManager : MonoBehaviour {
 			if (c != null && c.isWhite != isWhiteTurn) {
 				//Capture a piece
 
-				//if it is the king, end the game
-				if (c.GetType() == typeof(King)) {
-					EndGame();
-					return;
-				}
+				//Can no longer actually take the king
+				//if (c.GetType() == typeof(King)) {
+				//	EndGame();
+				//	return;
+				//}
 				activeChessman.Remove(c.gameObject);
 				Destroy(c.gameObject);
 			}
@@ -334,18 +334,21 @@ public class BoardManager : MonoBehaviour {
 				Vector3.forward * selectionY + Vector3.right * (selectionX + 1));
 		}
 	}
-	private void EndGame() {
-		if (isWhiteTurn) {
-			Debug.Log("White team wins!");
-		} else {
-			Debug.Log("Black team wins!");
-		}
+	public void EndGame() {
+		//if (isWhiteTurn) {
+		//	Debug.Log("White team wins!");
+		//} else {
+		//	Debug.Log("Black team wins!");
+		//}
 
 		foreach (GameObject go in activeChessman) {
 			Destroy(go);
 		}
 
 		isWhiteTurn = true;
+		whitePromotion.SetActive(false);
+		blackPromotion.SetActive(false);
+		chessPlane.SetActive(true);
 		BoardHighlights.Instance.HideHighlights();
 		SpawnAllChessmans();
 	}
