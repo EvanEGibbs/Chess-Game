@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using GAF.Core;
 
 public class BoardManager : MonoBehaviour {
 
@@ -31,6 +32,11 @@ public class BoardManager : MonoBehaviour {
 	//orientation for the pieces
 	private Quaternion orientation = Quaternion.Euler(0,180, 0);
 
+	public GameObject blackWinsAnimation1;
+	public GameObject blackWinsAnimation2;
+	public GameObject whiteWinsAnimation1;
+	public GameObject whiteWinsAnimation2;
+
 	private Material previousMat;
 	public Material selectedMat;
 
@@ -43,6 +49,7 @@ public class BoardManager : MonoBehaviour {
 		whitePromotion.SetActive(false);
 		blackPromotion.SetActive(false);
 		chessPlane = transform.FindChild("ChessPlane").gameObject;
+
 		SpawnAllChessmans();
 	}
 
@@ -205,12 +212,7 @@ public class BoardManager : MonoBehaviour {
 					Debug.Log("Stalemate!");
 				}
 				else {
-					if (isWhiteTurn) {
-						Debug.Log("Black team wins!");
-					}
-					else {
-						Debug.Log("White team wins!");
-					}
+					EndGame();
 				}
 			}
 		}
@@ -237,6 +239,15 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	private void SpawnAllChessmans() {
+		blackWinsAnimation1.GetComponent<GAFMovieClip>().stop();
+		blackWinsAnimation2.GetComponent<GAFMovieClip>().stop();
+		whiteWinsAnimation1.GetComponent<GAFMovieClip>().stop();
+		whiteWinsAnimation2.GetComponent<GAFMovieClip>().stop();
+		blackWinsAnimation1.SetActive(false);
+		blackWinsAnimation2.SetActive(false);
+		whiteWinsAnimation1.SetActive(false);
+		whiteWinsAnimation2.SetActive(false);
+
 		//list of all of the chessman prefabs
 		activeChessman = new List<GameObject>();
 		//the array of the board has it's size defined (takes in type Chessman)
@@ -334,7 +345,7 @@ public class BoardManager : MonoBehaviour {
 				Vector3.forward * selectionY + Vector3.right * (selectionX + 1));
 		}
 	}
-	public void EndGame() {
+	public void NewGame() {
 		//if (isWhiteTurn) {
 		//	Debug.Log("White team wins!");
 		//} else {
@@ -560,5 +571,27 @@ public class BoardManager : MonoBehaviour {
 		chessPlane.SetActive(true);
 		whitePromotion.SetActive(false);
 		blackPromotion.SetActive(false);
+	}
+
+	private void EndGame() {
+		Camera camera = GameObject.Find("Main Camera").GetComponent<Camera>();
+		if (!isWhiteTurn) {
+			if (camera.enabled) {
+				whiteWinsAnimation1.SetActive(true);
+				whiteWinsAnimation1.GetComponent<GAFMovieClip>().play();
+			} else {
+				whiteWinsAnimation2.SetActive(true);
+				whiteWinsAnimation2.GetComponent<GAFMovieClip>().play();
+			}
+		} else {
+			if (camera.enabled) {
+				blackWinsAnimation1.SetActive(true);
+				blackWinsAnimation1.GetComponent<GAFMovieClip>().play();
+			}
+			else {
+				blackWinsAnimation2.SetActive(true);
+				blackWinsAnimation2.GetComponent<GAFMovieClip>().play();
+			}
+		}
 	}
 }
