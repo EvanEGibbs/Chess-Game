@@ -36,6 +36,8 @@ public class BoardManager : MonoBehaviour {
 	public GameObject blackWinsAnimation2;
 	public GameObject whiteWinsAnimation1;
 	public GameObject whiteWinsAnimation2;
+	public GameObject flipBoardButton;
+	public GameObject staleMate;
 
 	private Material previousMat;
 	public Material selectedMat;
@@ -209,7 +211,7 @@ public class BoardManager : MonoBehaviour {
 
 			if (!CheckCanMove()) {
 				if (IsStalemate()) {
-					Debug.Log("Stalemate!");
+					staleMate.SetActive(true);
 				}
 				else {
 					EndGame();
@@ -247,6 +249,9 @@ public class BoardManager : MonoBehaviour {
 		blackWinsAnimation2.SetActive(false);
 		whiteWinsAnimation1.SetActive(false);
 		whiteWinsAnimation2.SetActive(false);
+
+		flipBoardButton.SetActive(true);
+		staleMate.SetActive(false);
 
 		//list of all of the chessman prefabs
 		activeChessman = new List<GameObject>();
@@ -574,6 +579,7 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	private void EndGame() {
+		flipBoardButton.SetActive(false);
 		Camera camera = GameObject.Find("Main Camera").GetComponent<Camera>();
 		if (!isWhiteTurn) {
 			if (camera.enabled) {
