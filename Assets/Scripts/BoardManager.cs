@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using GAF.Core;
+using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour {
 
@@ -38,6 +39,8 @@ public class BoardManager : MonoBehaviour {
 	public GameObject whiteWinsAnimation2;
 	public GameObject flipBoardButton;
 	public GameObject staleMate;
+	public GameObject turnColorText1;
+	public GameObject turnColorText2;
 
 	private Material previousMat;
 	public Material selectedMat;
@@ -67,7 +70,19 @@ public class BoardManager : MonoBehaviour {
 					//select the chessman clicked on
 					SelectChessman(selectionX, selectionY);
 				}
-				//if piece is selected
+				//if there is a piece where you click
+				else if (selectedChessman != null && Chessmans[selectionX, selectionY] != null) {
+					//if the piece is the same color, select it
+					if (selectedChessman.isWhite == Chessmans[selectionX, selectionY].isWhite) {
+						DeselectChessman();
+						SelectChessman(selectionX, selectionY);
+					}
+					//if not, move the piece there
+					else {
+						MoveChessman(selectionX, selectionY);
+					}
+				}
+				//if piece is selected and there is no piece where clicking on
 				else {
 					//move the chessman to space clicked on
 					MoveChessman(selectionX, selectionY);
@@ -126,12 +141,6 @@ public class BoardManager : MonoBehaviour {
 			Chessman c = Chessmans[x, y];
 			if (c != null && c.isWhite != isWhiteTurn) {
 				//Capture a piece
-
-				//Can no longer actually take the king
-				//if (c.GetType() == typeof(King)) {
-				//	EndGame();
-				//	return;
-				//}
 				activeChessman.Remove(c.gameObject);
 				Destroy(c.gameObject);
 			}
@@ -209,6 +218,15 @@ public class BoardManager : MonoBehaviour {
 			//switch player turn
 			isWhiteTurn = !isWhiteTurn;
 
+			if (isWhiteTurn) {
+				turnColorText1.GetComponent<Text>().text = "White";
+				turnColorText2.GetComponent<Text>().text = "White";
+			}
+			else {
+				turnColorText1.GetComponent<Text>().text = "Black";
+				turnColorText2.GetComponent<Text>().text = "Black";
+			}
+
 			if (!CheckCanMove()) {
 				if (IsStalemate()) {
 					staleMate.SetActive(true);
@@ -219,6 +237,12 @@ public class BoardManager : MonoBehaviour {
 			}
 		}
 
+		selectedChessman.GetComponent<MeshRenderer>().material = previousMat;
+		selectedChessman = null;
+		BoardHighlights.Instance.HideHighlights();
+	}
+
+	private void DeselectChessman() {
 		selectedChessman.GetComponent<MeshRenderer>().material = previousMat;
 		selectedChessman = null;
 		BoardHighlights.Instance.HideHighlights();
@@ -249,6 +273,9 @@ public class BoardManager : MonoBehaviour {
 		blackWinsAnimation2.SetActive(false);
 		whiteWinsAnimation1.SetActive(false);
 		whiteWinsAnimation2.SetActive(false);
+
+		turnColorText1.GetComponent<Text>().text = "White";
+		turnColorText2.GetComponent<Text>().text = "White";
 
 		flipBoardButton.SetActive(true);
 		staleMate.SetActive(false);
@@ -350,6 +377,7 @@ public class BoardManager : MonoBehaviour {
 				Vector3.forward * selectionY + Vector3.right * (selectionX + 1));
 		}
 	}
+
 	public void NewGame() {
 		//if (isWhiteTurn) {
 		//	Debug.Log("White team wins!");
