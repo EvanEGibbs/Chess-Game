@@ -53,7 +53,7 @@ public class BoardManager : MonoBehaviour {
 		Instance = this;
 		whitePromotion.SetActive(false);
 		blackPromotion.SetActive(false);
-		chessPlane = transform.FindChild("ChessPlane").gameObject;
+		chessPlane = transform.Find("ChessPlane").gameObject;
 
 		SpawnAllChessmans();
 	}
